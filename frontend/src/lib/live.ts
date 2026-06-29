@@ -60,12 +60,21 @@ function getContractAddress() {
 
 async function getClient() {
   if (cachedClient) return cachedClient;
-  const genlayer = await import("genlayer-js");
-  const chains = await import("genlayer-js/chains");
+
+  // genlayer-js exposes different chain objects depending on the network/package version.
+  // Cast dynamic imports to any so Next.js type-checking does not fail during Vercel builds.
+  const genlayer: any = await import("genlayer-js");
+  const chains: any = await import("genlayer-js/chains");
+
   const chainName = process.env.NEXT_PUBLIC_GENLAYER_CHAIN || "localnet";
-  const chain = (chains as Record<string, unknown>)[chainName] || (chains as Record<string, unknown>).localnet || (chains as Record<string, unknown>).simulator;
+  const chain = chains?.[chainName] ?? chains?.localnet ?? chains?.simulator;
+
+  if (!chain) {
+    throw new Error(`Unsupported GenLayer chain: ${chainName}`);
+  }
+
   cachedAccount = cachedAccount || genlayer.createAccount();
-  cachedClient = genlayer.createClient({ chain, account: cachedAccount });
+  cachedClient = genlayer.createClient({ chain, account: cachedAccount } as any);
   return cachedClient;
 }
 
