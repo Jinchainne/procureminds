@@ -26,7 +26,6 @@ function normalizeRfq(raw: any): Rfq {
     evaluationCompleted: Boolean(raw?.evaluation_completed ?? raw?.evaluationCompleted),
     evaluationSummary: raw?.evaluation_summary ?? raw?.evaluationSummary ?? ""
   };
-  return api;
 }
 
 function normalizeSupplier(raw: any): Supplier {
