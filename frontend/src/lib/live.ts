@@ -54,7 +54,9 @@ function normalizeSupplier(raw: any): Supplier {
 
 function getContractAddress() {
   const address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-  if (!address) throw new Error("NEXT_PUBLIC_CONTRACT_ADDRESS is not set. Deploy the contract first or enable demo mode.");
+  if (!address) {
+    throw new Error("NEXT_PUBLIC_CONTRACT_ADDRESS is not set. Deploy the contract first or enable demo mode.");
+  }
   return address;
 }
 
@@ -81,28 +83,33 @@ async function getClient() {
 async function waitFor(txHash: string): Promise<TransactionMeta> {
   const client = await getClient();
   const types = await import("genlayer-js/types");
+
   const receipt = await client.waitForTransactionReceipt({
     hash: txHash,
     status: (types as any).TransactionStatus?.FINALIZED ?? "FINALIZED",
     fullTransaction: false,
     retries: 220
   });
+
   return { txHash, receipt };
 }
 
 async function write(functionName: string, args: unknown[]): Promise<TransactionMeta> {
   const client = await getClient();
+
   const txHash = await client.writeContract({
     address: getContractAddress(),
     functionName,
     args,
     value: 0
   });
+
   return waitFor(txHash);
 }
 
 async function read(functionName: string, args: unknown[] = []) {
   const client = await getClient();
+
   return client.readContract({
     address: getContractAddress(),
     functionName,
@@ -115,35 +122,60 @@ export function createLiveClient(): ProcurementClient {
   const api: ProcurementClient = {
     mode: "live",
     contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+
     async createRfq(input: RfqInput) {
-      const tx = await write("create_rfq", [input.title, input.requirements, input.evalCriteria, Number(input.budgetCents)]);
+      const tx = await write("create_rfq", [
+        input.title,
+        input.requirements,
+        input.evalCriteria,
+        Number(input.budgetCents)
+      ]);
+
       const total = await read("get_total_rfqs", []);
       const rfq = await api.getRfq(numberFrom(total));
+
       return { rfq, tx };
     },
+
     async submitSupplier(rfqId: number, input: SupplierInput) {
-      const tx = await write("submit_supplier", [rfqId, input.name, input.websiteUrl, input.proposalUrl, Number(input.priceCents), input.claims]);
+      const tx = await write("submit_supplier", [
+        rfqId,
+        input.name,
+        input.websiteUrl,
+        input.proposalUrl,
+        Number(input.priceCents),
+        input.claims
+      ]);
+
       const rfq = await api.getRfq(rfqId);
       const supplier = await api.getSupplier(rfqId, rfq.supplierCount);
+
       return { supplier, tx };
     },
+
     async evaluateSupplier(rfqId: number, supplierIndex: number) {
       const tx = await write("evaluate_supplier", [rfqId, supplierIndex]);
       const supplier = await api.getSupplier(rfqId, supplierIndex);
+
       return { supplier, tx };
     },
+
     async selectWinner(rfqId: number) {
       const tx = await write("select_winner", [rfqId]);
       const rfq = await api.getRfq(rfqId);
       const winner = rfq.winner > 0 ? await api.getSupplier(rfqId, rfq.winner) : undefined;
+
       return { rfq, winner, tx };
     },
+
     async getRfq(rfqId: number) {
       return normalizeRfq(await read("get_rfq", [rfqId]));
     },
+
     async getSupplier(rfqId: number, supplierIndex: number) {
       return normalizeSupplier(await read("get_supplier", [rfqId, supplierIndex]));
     }
   };
+
   return api;
 }
