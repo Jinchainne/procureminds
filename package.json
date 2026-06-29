@@ -1,0 +1,24 @@
+{
+  "name": "procureminds-ai-pro",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "GenLayer Intelligent Contract project for AI-powered procurement evaluation.",
+  "scripts": {
+    "frontend:dev": "npm --prefix frontend run dev",
+    "frontend:build": "npm --prefix frontend run build",
+    "frontend:typecheck": "npm --prefix frontend run typecheck",
+    "contract:syntax": "python -m py_compile contracts/procureminds_ai_pro.py",
+    "contract:lint": "genvm-lint check contracts/procureminds_ai_pro.py",
+    "deploy:cli": "genlayer deploy --contract contracts/procureminds_ai_pro.py",
+    "deploy:sdk": "tsx scripts/deploy.ts",
+    "test": "python -m py_compile contracts/procureminds_ai_pro.py && npm --prefix frontend run typecheck"
+  },
+  "dependencies": {
+    "genlayer-js": "latest"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.4.5"
+  }
+}
