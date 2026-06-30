@@ -30,6 +30,14 @@ Default local network endpoints:
 genlayer deploy --contract contracts/procureminds_ai_pro.py
 ```
 
+### SDK deployment
+
+```bash
+GENLAYER_CHAIN=testnetBradbury GENLAYER_RPC_URL=https://your-public-genlayer-rpc npm run deploy:sdk
+```
+
+Set `GENLAYER_PRIVATE_KEY` if you want to deploy with a specific signer.
+
 ## Frontend deployment
 
 ### Local

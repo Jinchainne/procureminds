@@ -56,6 +56,9 @@ export type TransactionMeta = {
 export type ProcurementClient = {
   mode: "live" | "setup";
   contractAddress?: string;
+  connectWallet(): Promise<string | undefined>;
+  getSignerAddress(): Promise<string | undefined>;
+  getTotalRfqs(): Promise<number>;
   createRfq(input: RfqInput): Promise<{ rfq: Rfq; tx?: TransactionMeta }>;
   submitSupplier(rfqId: number, input: SupplierInput): Promise<{ supplier: Supplier; tx?: TransactionMeta }>;
   evaluateSupplier(rfqId: number, supplierIndex: number): Promise<{ supplier: Supplier; tx?: TransactionMeta }>;

@@ -2,6 +2,17 @@ import type { ProcurementClient, Rfq, RfqInput, Supplier, SupplierInput, Transac
 
 type ClientAny = any;
 
+const SIGNER_KEY = "procureminds-genlayer-signer";
+const SIGNER_MODE_KEY = "procureminds-genlayer-signer-mode";
+
+declare global {
+  interface Window {
+    ethereum?: {
+      request(args: { method: string; params?: unknown[] }): Promise<unknown>;
+    };
+  }
+}
+
 let cachedAccount: any | undefined;
 let cachedClient: ClientAny | undefined;
 
@@ -70,13 +81,35 @@ async function getClient() {
 
   const chainName = process.env.NEXT_PUBLIC_GENLAYER_CHAIN || "localnet";
   const chain = chains?.[chainName] ?? chains?.localnet ?? chains?.simulator;
+  const endpoint = process.env.NEXT_PUBLIC_GENLAYER_RPC_URL;
 
   if (!chain) {
     throw new Error(`Unsupported GenLayer chain: ${chainName}`);
   }
 
-  cachedAccount = cachedAccount || genlayer.createAccount();
-  cachedClient = genlayer.createClient({ chain, account: cachedAccount } as any);
+  const signerMode = typeof window !== "undefined" ? window.localStorage.getItem(SIGNER_MODE_KEY) : "";
+  if (typeof window !== "undefined" && signerMode === "wallet" && window.ethereum) {
+    const accounts = await window.ethereum.request({ method: "eth_accounts" });
+    const [address] = Array.isArray(accounts) ? accounts : [];
+    cachedAccount = address;
+    cachedClient = genlayer.createClient({ chain, account: address, provider: window.ethereum, endpoint } as any);
+    return cachedClient;
+  }
+
+  if (!cachedAccount) {
+    let privateKey: `0x${string}` | undefined;
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem(SIGNER_KEY);
+      privateKey = stored?.startsWith("0x") ? (stored as `0x${string}`) : undefined;
+      if (!privateKey && typeof genlayer.generatePrivateKey === "function") {
+        privateKey = genlayer.generatePrivateKey();
+        if (privateKey) window.localStorage.setItem(SIGNER_KEY, privateKey);
+      }
+    }
+    cachedAccount = genlayer.createAccount(privateKey);
+  }
+
+  cachedClient = genlayer.createClient({ chain, account: cachedAccount, endpoint } as any);
   return cachedClient;
 }
 
@@ -122,6 +155,31 @@ export function createLiveClient(): ProcurementClient {
   const api: ProcurementClient = {
     mode: "live",
     contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+
+    async connectWallet() {
+      if (typeof window === "undefined" || !window.ethereum) {
+        throw new Error("No browser wallet provider found.");
+      }
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const [address] = Array.isArray(accounts) ? accounts : [];
+      if (!address || typeof address !== "string") {
+        throw new Error("Wallet did not return an account.");
+      }
+      window.localStorage.setItem(SIGNER_MODE_KEY, "wallet");
+      cachedAccount = address;
+      cachedClient = undefined;
+      await getClient();
+      return address;
+    },
+
+    async getSignerAddress() {
+      await getClient();
+      return typeof cachedAccount === "string" ? cachedAccount : cachedAccount?.address;
+    },
+
+    async getTotalRfqs() {
+      return numberFrom(await read("get_total_rfqs", []));
+    },
 
     async createRfq(input: RfqInput) {
       const tx = await write("create_rfq", [
@@ -176,7 +234,7 @@ export function createLiveClient(): ProcurementClient {
     },
 
     async getLatestRfq() {
-      const total = numberFrom(await read("get_total_rfqs", []));
+      const total = await api.getTotalRfqs();
       if (total <= 0) return null;
       return api.getRfq(total);
     },

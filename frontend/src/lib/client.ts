@@ -8,6 +8,15 @@ function createSetupClient(): ProcurementClient {
 
   return {
     mode: "setup",
+    async connectWallet() {
+      return undefined;
+    },
+    async getSignerAddress() {
+      return undefined;
+    },
+    async getTotalRfqs() {
+      return 0;
+    },
     async createRfq() {
       return setupError();
     },

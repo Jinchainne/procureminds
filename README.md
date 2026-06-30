@@ -126,6 +126,7 @@ npm run deploy:cli           # deploy via GenLayer CLI
 ## Vercel
 
 This repository includes `vercel.json`, so Vercel can deploy from the repo root while building the Next.js app in `frontend/`.
+The current production app is live at https://procureminds.vercel.app.
 
 For a live GenLayer deployment, set:
 

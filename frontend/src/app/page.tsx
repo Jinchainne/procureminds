@@ -40,6 +40,9 @@ export default function Home() {
   const [supplierForm, setSupplierForm] = useState<SupplierInput>(initialSupplier);
   const [rfq, setRfq] = useState<Rfq | null>(null);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [loadRfqId, setLoadRfqId] = useState<string>("");
+  const [signerAddress, setSignerAddress] = useState<string>("");
+  const [totalRfqs, setTotalRfqs] = useState<number>(0);
   const [busy, setBusy] = useState<string>("");
   const [logs, setLogs] = useState<string[]>([txLine("App ready", runtime.mode === "setup" ? "contract setup required" : "live mode")]);
   const [error, setError] = useState<string>("");
@@ -72,6 +75,10 @@ export default function Home() {
     async function loadLatest() {
       setBusy("Load state");
       try {
+        const [total, signer] = await Promise.all([client.getTotalRfqs(), client.getSignerAddress()]);
+        if (!active) return;
+        setTotalRfqs(total);
+        setSignerAddress(signer ?? "");
         const latest = await client.getLatestRfq();
         if (!active) return;
         if (!latest) {
@@ -82,6 +89,7 @@ export default function Home() {
         if (!active) return;
         setRfq(latest);
         setSuppliers(latestSuppliers);
+        setLoadRfqId(String(latest.id));
         pushLog("Loaded RFQ", `#${latest.id}`);
       } catch (err) {
         if (!active) return;
@@ -102,13 +110,46 @@ export default function Home() {
 
   async function refreshState() {
     const result = await handleAction("Refresh state", async () => {
+      const [total, signer] = await Promise.all([client.getTotalRfqs(), client.getSignerAddress()]);
       const current = rfq ? await client.getRfq(rfq.id) : await client.getLatestRfq();
       const currentSuppliers = current ? await client.listSuppliers(current.id) : [];
-      return { rfq: current, suppliers: currentSuppliers };
+      return { rfq: current, suppliers: currentSuppliers, total, signer };
+    });
+    if (!result) return;
+    setTotalRfqs(result.total);
+    setSignerAddress(result.signer ?? "");
+    setRfq(result.rfq);
+    setSuppliers(result.suppliers);
+    if (result.rfq) setLoadRfqId(String(result.rfq.id));
+  }
+
+  async function connectWallet() {
+    const address = await handleAction("Connect wallet", () => client.connectWallet());
+    if (!address) return;
+    setSignerAddress(address);
+  }
+
+  async function loadRfqById(event: FormEvent) {
+    event.preventDefault();
+    const id = Number(loadRfqId);
+    if (!Number.isInteger(id) || id <= 0) {
+      setError("Enter a valid RFQ id.");
+      return;
+    }
+    const result = await handleAction(`Load RFQ #${id}`, async () => {
+      const [loadedRfq, loadedSuppliers, total, signer] = await Promise.all([
+        client.getRfq(id),
+        client.listSuppliers(id),
+        client.getTotalRfqs(),
+        client.getSignerAddress()
+      ]);
+      return { rfq: loadedRfq, suppliers: loadedSuppliers, total, signer };
     });
     if (!result) return;
     setRfq(result.rfq);
     setSuppliers(result.suppliers);
+    setTotalRfqs(result.total);
+    setSignerAddress(result.signer ?? "");
   }
 
   async function createRfq(event: FormEvent) {
@@ -238,8 +279,17 @@ export default function Home() {
           <div className="status-row"><span>Mode</span><strong><span className={runtime.mode === "live" ? "badge live" : "badge"}>{runtime.mode === "setup" ? "SETUP REQUIRED" : runtime.mode.toUpperCase()}</span></strong></div>
           <div className="status-row"><span>Chain</span><strong>{runtime.chain}</strong></div>
           <div className="status-row"><span>Contract</span><strong>{runtime.contractAddress}</strong></div>
+          <div className="status-row"><span>Signer</span><strong>{signerAddress || "Not connected"}</strong></div>
+          <div className="status-row"><span>Total RFQs</span><strong>{totalRfqs}</strong></div>
           <div className="status-row"><span>Current RFQ</span><strong>{rfq ? `#${rfq.id}` : "None"}</strong></div>
+          <form className="load-row" onSubmit={loadRfqById}>
+            <input className="input compact" type="number" min="1" value={loadRfqId} onChange={(event) => setLoadRfqId(event.target.value)} placeholder="RFQ id" />
+            <button className="btn secondary" disabled={Boolean(busy) || !contractReady}>Load</button>
+          </form>
           <div className="action-row">
+            <button className="btn secondary" onClick={connectWallet} disabled={Boolean(busy) || !contractReady}>
+              {busy === "Connect wallet" ? "Connecting..." : "Connect wallet"}
+            </button>
             <button className="btn secondary" onClick={exportPacket} disabled={Boolean(busy)}>Export</button>
           </div>
           {!contractReady && (

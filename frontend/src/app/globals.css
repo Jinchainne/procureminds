@@ -85,6 +85,7 @@ h1 { margin: 12px 0; font-size: 56px; line-height: 1; letter-spacing: 0; }
 .btn.danger { background: rgba(239, 68, 68, .16); color: #fecaca; border: 1px solid rgba(239, 68, 68, .28); }
 .action-row, .split-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .split-actions { justify-content: flex-end; }
+.load-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
 
 .status-card { padding: 22px; display: grid; gap: 14px; }
 .status-row { display: flex; justify-content: space-between; gap: 14px; color: var(--muted); font-size: 14px; }
@@ -117,6 +118,7 @@ h1 { margin: 12px 0; font-size: 56px; line-height: 1; letter-spacing: 0; }
   outline: none;
 }
 .textarea { min-height: 104px; resize: vertical; line-height: 1.5; }
+.input.compact { min-width: 0; }
 .input:focus, .textarea:focus { border-color: rgba(56,189,248,.65); box-shadow: 0 0 0 3px rgba(56,189,248,.1); }
 .inline { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
 

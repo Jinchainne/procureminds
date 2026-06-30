@@ -14,8 +14,9 @@ const chains: Record<string, unknown> = {
 async function main() {
   const chainName = process.env.GENLAYER_CHAIN || "localnet";
   const chain = chains[chainName] || localnet;
-  const account = createAccount();
-  const client = createClient({ chain: chain as never, account });
+  const account = createAccount(process.env.GENLAYER_PRIVATE_KEY as `0x${string}` | undefined);
+  const endpoint = process.env.GENLAYER_RPC_URL || process.env.NEXT_PUBLIC_GENLAYER_RPC_URL;
+  const client = createClient({ chain: chain as never, account, endpoint });
 
   const contractPath = path.resolve(process.cwd(), "contracts/procureminds_ai_pro.py");
   const code = new Uint8Array(readFileSync(contractPath));
@@ -40,7 +41,7 @@ async function main() {
   console.log("Contract address:", address);
   writeFileSync(
     path.resolve(process.cwd(), "frontend/.env.local"),
-    `NEXT_PUBLIC_CONTRACT_ADDRESS=${address}\nNEXT_PUBLIC_GENLAYER_CHAIN=${chainName}\nNEXT_PUBLIC_GENLAYER_RPC_URL=http://localhost:4000/api\nNEXT_PUBLIC_DEMO_MODE=false\n`
+    `NEXT_PUBLIC_CONTRACT_ADDRESS=${address}\nNEXT_PUBLIC_GENLAYER_CHAIN=${chainName}\nNEXT_PUBLIC_GENLAYER_RPC_URL=${endpoint || "http://localhost:4000/api"}\n`
   );
   console.log("Wrote frontend/.env.local");
 }

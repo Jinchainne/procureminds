@@ -22,7 +22,6 @@ genlayer deploy --contract contracts/procureminds_ai_pro.py
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_contract_address
 NEXT_PUBLIC_GENLAYER_CHAIN=localnet
 NEXT_PUBLIC_GENLAYER_RPC_URL=http://localhost:4000/api
-NEXT_PUBLIC_DEMO_MODE=false
 ```
 
 4. Run frontend:
@@ -35,7 +34,7 @@ npm run dev
 
 ## Studio checklist
 
-- Reset storage only when you intentionally want a clean demo.
+- Confirm the contract address is copied into Vercel and local env files.
 - Confirm transaction status is accepted/finalized.
 - Check execution result; finalized does not always mean contract logic succeeded.
 - Run `get_total_rfqs`, `get_rfq`, and `get_supplier` to verify state.
