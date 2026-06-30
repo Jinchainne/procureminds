@@ -256,7 +256,7 @@ export default function Home() {
             {rfq ? (
               <div>
                 <p className="result-text"><strong>#{rfq.id} {rfq.title}</strong></p>
-                <p className="result-text"><strong>Budget:</strong> {dollars(rfq.budgetCents)} · <strong>Status:</strong> {rfq.status} · <strong>Suppliers:</strong> {rfq.supplierCount}</p>
+                <p className="result-text"><strong>Budget:</strong> {dollars(rfq.budgetCents)} &middot; <strong>Status:</strong> {rfq.status} &middot; <strong>Suppliers:</strong> {rfq.supplierCount}</p>
                 <p className="result-text"><strong>Summary:</strong> {rfq.evaluationSummary}</p>
               </div>
             ) : <div className="empty">RFQ data will appear here.</div>}

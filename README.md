@@ -74,14 +74,14 @@ Default local RPC: `http://localhost:4000/api`.
 
 ### 2. Deploy the contract
 
-Option A — GenLayer Studio:
+Option A - GenLayer Studio:
 
 1. Open local Studio.
 2. Paste or load `contracts/procureminds_ai_pro.py`.
 3. Deploy.
 4. Copy the contract address.
 
-Option B — CLI:
+Option B - CLI:
 
 ```bash
 genlayer deploy --contract contracts/procureminds_ai_pro.py
@@ -108,11 +108,33 @@ npm run dev
 ## Scripts
 
 ```bash
+npm run dev                  # run the frontend from the repo root
+npm run build                # Vercel-compatible production build
+npm run typecheck            # TypeScript check
 npm run contract:syntax      # Python syntax check
 npm run contract:lint        # requires genvm-linter
 npm run frontend:typecheck   # TypeScript check
 npm run frontend:build       # Next.js production build
 npm run deploy:cli           # deploy via GenLayer CLI
+```
+
+## Vercel
+
+This repository includes `vercel.json`, so Vercel can deploy from the repo root while building the Next.js app in `frontend/`.
+
+For a public demo before the contract is live, leave demo mode enabled:
+
+```env
+NEXT_PUBLIC_DEMO_MODE=true
+```
+
+For a live GenLayer deployment, set:
+
+```env
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_contract_address
+NEXT_PUBLIC_GENLAYER_CHAIN=localnet
+NEXT_PUBLIC_GENLAYER_RPC_URL=https://your-public-genlayer-rpc
+NEXT_PUBLIC_DEMO_MODE=false
 ```
 
 ## Contract highlights
@@ -131,7 +153,7 @@ npm run deploy:cli           # deploy via GenLayer CLI
 - [ ] Contract deployed to GenLayer Studio / testnet
 - [ ] Contract address added to frontend env
 - [ ] Vercel deployment created
-- [ ] 1–2 minute demo video recorded
+- [ ] 1-2 minute demo video recorded
 - [ ] `SUBMISSION.md` links updated
 
 ## License

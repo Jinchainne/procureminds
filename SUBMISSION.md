@@ -6,7 +6,7 @@ ProcureMinds AI Pro
 
 ## Category
 
-Builder → Projects
+Builder -> Projects
 
 ## Short Description
 
@@ -37,7 +37,7 @@ ProcureMinds AI Pro depends on GenLayer because its core business logic requires
 ## Form description
 
 ```txt
-ProcureMinds AI Pro is a GenLayer Intelligent Contract project for AI-powered procurement evaluation. Buyers create an RFQ, suppliers submit website/proposal URLs, and the contract reads live web data, evaluates qualitative vendor fit, scores suppliers from 0–100, classifies risk, and selects the winning supplier on-chain.
+ProcureMinds AI Pro is a GenLayer Intelligent Contract project for AI-powered procurement evaluation. Buyers create an RFQ, suppliers submit website/proposal URLs, and the contract reads live web data, evaluates qualitative vendor fit, scores suppliers from 0-100, classifies risk, and selects the winning supplier on-chain.
 
 This project is GenLayer-native because the core logic requires subjective judgment, live web access, and LLM-based consensus. A traditional smart contract cannot read supplier proposals or compare credibility, delivery capability, price reasonableness, and risk.
 
