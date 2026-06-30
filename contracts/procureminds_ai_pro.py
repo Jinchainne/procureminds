@@ -49,7 +49,7 @@ class Contract(gl.Contract):
     evaluation_completed: TreeMap[u256, bool]
 
     def __init__(self):
-        self.owner = gl.message.sender
+        self.owner = gl.message.sender_address
         self.rfq_count = u256(0)
         # TreeMap fields are storage-backed. Do not initialize them in Studio.
 
@@ -156,7 +156,7 @@ class Contract(gl.Contract):
         self.rfq_count += u256(1)
         rfq_id = self.rfq_count
 
-        self.rfq_creator[rfq_id] = gl.message.sender
+        self.rfq_creator[rfq_id] = gl.message.sender_address
         self.rfq_title[rfq_id] = title
         self.rfq_requirements[rfq_id] = requirements
         self.rfq_eval_criteria[rfq_id] = eval_criteria
@@ -200,7 +200,7 @@ class Contract(gl.Contract):
         key = self._supplier_key(rid, current_count)
 
         self.supplier_name[key] = name
-        self.supplier_wallet[key] = gl.message.sender
+        self.supplier_wallet[key] = gl.message.sender_address
         self.supplier_website[key] = website_url
         self.supplier_proposal_url[key] = proposal_url
         self.supplier_price_cents[key] = u256(price_cents)
@@ -349,7 +349,7 @@ Scoring guidance:
         rid = u256(rfq_id)
         if rid == u256(0) or rid > self.rfq_count:
             raise UserError("Invalid RFQ id")
-        if gl.message.sender != self.rfq_creator[rid]:
+        if gl.message.sender_address != self.rfq_creator[rid]:
             raise UserError("Only RFQ creator can select winner")
         if self.rfq_status[rid] != "OPEN":
             raise UserError("RFQ is not open")
@@ -402,7 +402,7 @@ Scoring guidance:
         rid = u256(rfq_id)
         if rid == u256(0) or rid > self.rfq_count:
             raise UserError("Invalid RFQ id")
-        if gl.message.sender != self.rfq_creator[rid]:
+        if gl.message.sender_address != self.rfq_creator[rid]:
             raise UserError("Only RFQ creator can close RFQ")
         self.rfq_status[rid] = "CLOSED"
         self.evaluation_summary[rid] = "RFQ closed by creator."

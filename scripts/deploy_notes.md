@@ -13,15 +13,14 @@ genlayer up
 2. Deploy contract:
 
 ```bash
-genlayer deploy --contract contracts/procureminds_ai_pro.py
+GENLAYER_CHAIN=studionet npm run deploy:sdk
 ```
 
 3. Copy contract address into `frontend/.env.local`:
 
 ```env
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_contract_address
-NEXT_PUBLIC_GENLAYER_CHAIN=localnet
-NEXT_PUBLIC_GENLAYER_RPC_URL=http://localhost:4000/api
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xb2123b641921Dc1E03fAAE0af4f71C4e184aA7c7
+NEXT_PUBLIC_GENLAYER_CHAIN=studionet
 ```
 
 4. Run frontend:

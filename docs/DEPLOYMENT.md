@@ -33,7 +33,7 @@ genlayer deploy --contract contracts/procureminds_ai_pro.py
 ### SDK deployment
 
 ```bash
-GENLAYER_CHAIN=testnetBradbury GENLAYER_RPC_URL=https://your-public-genlayer-rpc npm run deploy:sdk
+GENLAYER_CHAIN=studionet npm run deploy:sdk
 ```
 
 Set `GENLAYER_PRIVATE_KEY` if you want to deploy with a specific signer.
@@ -54,12 +54,11 @@ npm run dev
 Set environment variables:
 
 ```env
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_contract_address
-NEXT_PUBLIC_GENLAYER_CHAIN=localnet
-NEXT_PUBLIC_GENLAYER_RPC_URL=http://localhost:4000/api
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xb2123b641921Dc1E03fAAE0af4f71C4e184aA7c7
+NEXT_PUBLIC_GENLAYER_CHAIN=studionet
 ```
 
-For a public Vercel deployment, use a public GenLayer RPC/studionet/testnet configuration rather than a localhost RPC.
+For the built-in `studionet` preset, leave `NEXT_PUBLIC_GENLAYER_RPC_URL` unset unless you intentionally need a custom public RPC.
 
 ## Notes
 

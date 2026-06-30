@@ -26,9 +26,9 @@ git push -u origin main
 Update `SUBMISSION.md`:
 
 ```txt
-GitHub: https://github.com/YOUR_USERNAME/procureminds-ai-pro
-Live App / Vercel: https://your-vercel-url.vercel.app
-Contract Address: 0x...
+GitHub: https://github.com/Jinchainne/procureminds
+Live App / Vercel: https://procureminds.vercel.app
+Contract Address: 0xb2123b641921Dc1E03fAAE0af4f71C4e184aA7c7
 Walkthrough Video: https://...
 ```
 

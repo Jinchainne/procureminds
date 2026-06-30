@@ -131,10 +131,11 @@ The current production app is live at https://procureminds.vercel.app.
 For a live GenLayer deployment, set:
 
 ```env
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_contract_address
-NEXT_PUBLIC_GENLAYER_CHAIN=localnet
-NEXT_PUBLIC_GENLAYER_RPC_URL=https://your-public-genlayer-rpc
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xb2123b641921Dc1E03fAAE0af4f71C4e184aA7c7
+NEXT_PUBLIC_GENLAYER_CHAIN=studionet
 ```
+
+Leave `NEXT_PUBLIC_GENLAYER_RPC_URL` unset for the built-in `studionet` chain preset unless you are intentionally using a custom public RPC.
 
 ## Contract highlights
 
@@ -149,9 +150,9 @@ NEXT_PUBLIC_GENLAYER_RPC_URL=https://your-public-genlayer-rpc
 ## Builder Program checklist
 
 - [ ] Public GitHub repository
-- [ ] Contract deployed to GenLayer Studio / testnet
-- [ ] Contract address added to frontend env
-- [ ] Vercel deployment created
+- [x] Contract deployed to GenLayer Studio / testnet
+- [x] Contract address added to frontend env
+- [x] Vercel deployment created
 - [ ] 1-2 minute walkthrough video recorded
 - [ ] `SUBMISSION.md` links updated
 
