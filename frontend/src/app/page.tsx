@@ -250,7 +250,9 @@ export default function Home() {
     <main className="shell">
       <nav className="nav">
         <div className="logo">
-          <div className="logo-mark">PM</div>
+          <div className="logo-mark" aria-hidden="true">
+            <img src="/brand/procureminds-mark.svg" alt="" />
+          </div>
           <span>ProcureMinds AI Pro</span>
         </div>
         <div className="nav-links">
@@ -262,15 +264,24 @@ export default function Home() {
       </nav>
 
       <section className="hero">
-        <div className="hero-card">
-          <div className="eyebrow">GenLayer Intelligent Contract Project</div>
-          <h1>AI procurement committee on-chain.</h1>
-          <p className="lead">
-            Create an RFQ, submit supplier website/proposal URLs, let a GenLayer Intelligent Contract read web evidence, score vendor fit, classify risk, and select the winning supplier with transparent procurement logic.
-          </p>
-          <div className="hero-actions">
-            <a className="btn" href="#rfq">Start RFQ</a>
-            <a className="btn secondary" href="https://docs.genlayer.com" target="_blank" rel="noreferrer">GenLayer docs</a>
+        <div className="hero-card primary-hero">
+          <div className="hero-media">
+            <img className="hero-banner" src="/brand/genlayer-prism-banner.svg" alt="GenLayer prism light banner" />
+            <div className="hero-media-badge">
+              <img src="/brand/procureminds-mark.svg" alt="" />
+              <span>GenLayer Live</span>
+            </div>
+          </div>
+          <div className="hero-copy">
+            <div className="eyebrow">GenLayer Intelligent Contract Project</div>
+            <h1>AI procurement committee on-chain.</h1>
+            <p className="lead">
+              Create an RFQ, submit supplier website/proposal URLs, let a GenLayer Intelligent Contract read web evidence, score vendor fit, classify risk, and select the winning supplier with transparent procurement logic.
+            </p>
+            <div className="hero-actions">
+              <a className="btn" href="#rfq">Start RFQ</a>
+              <a className="btn secondary" href="https://docs.genlayer.com" target="_blank" rel="noreferrer">GenLayer docs</a>
+            </div>
           </div>
         </div>
 

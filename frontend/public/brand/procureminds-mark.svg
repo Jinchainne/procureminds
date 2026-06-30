@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">ProcureMinds mark</title>
+  <desc id="desc">Angular black procurement intelligence mark.</desc>
+  <rect width="512" height="512" rx="0" fill="#ffffff"/>
+  <path fill="#020617" d="M216 30 20 478l164-62 64-140-32-56V30Z"/>
+  <path fill="#020617" d="M296 30v190l-32 56 64 140 164 62L296 30Z"/>
+  <path fill="#020617" d="m256 196-41 121 41 22 41-22-41-121Z"/>
+  <path fill="#020617" d="m175 397 81-38 81 38-81 50-81-50Z"/>
+</svg>

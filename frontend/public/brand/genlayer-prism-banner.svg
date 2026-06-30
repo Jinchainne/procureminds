@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title desc">
+  <title id="title">GenLayer prism banner</title>
+  <desc id="desc">A luminous prism splitting light into cyan and magenta beams on a black field.</desc>
+  <defs>
+    <linearGradient id="beamWhite" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".05"/>
+      <stop offset=".43" stop-color="#ffffff" stop-opacity=".95"/>
+      <stop offset=".56" stop-color="#7dd3fc" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".04"/>
+    </linearGradient>
+    <linearGradient id="cyanBeam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity=".05"/>
+      <stop offset=".45" stop-color="#22d3ee" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity=".92"/>
+    </linearGradient>
+    <linearGradient id="magentaBeam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f0abfc" stop-opacity=".08"/>
+      <stop offset=".45" stop-color="#e879f9" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#f000b8" stop-opacity=".95"/>
+    </linearGradient>
+    <linearGradient id="violetBeam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity=".05"/>
+      <stop offset=".6" stop-color="#a855f7" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#2563eb" stop-opacity=".85"/>
+    </linearGradient>
+    <radialGradient id="core" cx="50%" cy="48%" r="58%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".28" stop-color="#fef3c7"/>
+      <stop offset=".54" stop-color="#67e8f9" stop-opacity=".7"/>
+      <stop offset="1" stop-color="#111827" stop-opacity=".18"/>
+    </radialGradient>
+    <linearGradient id="prismFaceA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".82"/>
+      <stop offset=".24" stop-color="#7dd3fc" stop-opacity=".36"/>
+      <stop offset=".52" stop-color="#f97316" stop-opacity=".52"/>
+      <stop offset=".78" stop-color="#e879f9" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#020617" stop-opacity=".2"/>
+    </linearGradient>
+    <linearGradient id="prismFaceB" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fef3c7" stop-opacity=".78"/>
+      <stop offset=".32" stop-color="#22d3ee" stop-opacity=".36"/>
+      <stop offset=".68" stop-color="#ef4444" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#020617" stop-opacity=".16"/>
+    </linearGradient>
+    <filter id="softGlow" x="-30%" y="-50%" width="160%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="hardGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1500" height="500" fill="#000000"/>
+  <path d="M0 338 C220 304 386 280 552 248" stroke="url(#beamWhite)" stroke-width="10" fill="none" filter="url(#softGlow)"/>
+  <path d="M553 248 C760 238 885 230 1010 186 C1172 130 1304 58 1500 0" stroke="url(#magentaBeam)" stroke-width="20" fill="none" filter="url(#softGlow)"/>
+  <path d="M548 254 C770 250 880 264 1020 282 C1190 304 1325 320 1500 306" stroke="url(#cyanBeam)" stroke-width="10" fill="none" filter="url(#softGlow)"/>
+  <path d="M552 264 C744 306 904 340 1078 326 C1234 314 1352 258 1500 212" stroke="url(#violetBeam)" stroke-width="24" fill="none" opacity=".76" filter="url(#softGlow)"/>
+  <path d="M560 225 C746 188 930 152 1138 170 C1280 182 1392 230 1500 252" stroke="#14b8a6" stroke-width="4" fill="none" opacity=".55" filter="url(#softGlow)"/>
+  <g transform="translate(630 118) rotate(10 105 118)" filter="url(#hardGlow)">
+    <polygon points="70,0 186,30 222,137 139,226 25,190 0,73" fill="url(#prismFaceA)" stroke="#dbeafe" stroke-opacity=".72" stroke-width="3"/>
+    <polygon points="70,0 112,90 222,137 186,30" fill="#f8fafc" fill-opacity=".22" stroke="#ffffff" stroke-opacity=".4"/>
+    <polygon points="0,73 112,90 139,226 25,190" fill="#0f172a" fill-opacity=".38" stroke="#ffffff" stroke-opacity=".28"/>
+    <polygon points="112,90 222,137 139,226" fill="url(#prismFaceB)" stroke="#ffffff" stroke-opacity=".34"/>
+    <polygon points="70,0 0,73 112,90" fill="#93c5fd" fill-opacity=".22" stroke="#ffffff" stroke-opacity=".28"/>
+    <polygon points="112,90 78,132 104,170 153,160 167,110" fill="url(#core)" opacity=".95"/>
+    <path d="M70 0 112 90 0 73M112 90l74-60M112 90l27 136M112 90l110 47M112 90 25 190" stroke="#ffffff" stroke-opacity=".34" stroke-width="2"/>
+  </g>
+  <ellipse cx="730" cy="250" rx="190" ry="86" fill="#ffffff" opacity=".05" filter="url(#softGlow)"/>
+</svg>
