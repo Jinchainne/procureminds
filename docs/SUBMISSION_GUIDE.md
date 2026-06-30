@@ -26,6 +26,8 @@ The submission includes a Python Intelligent Contract, a Next.js demo UI, GenLay
 
 ## Links to prepare
 
+- Builder portal: https://portal.genlayer.foundation/
+- GenLayer Labs GitHub: https://github.com/genlayerlabs
 - GitHub repository
 - Vercel or public demo URL
 - Contract address

@@ -29,6 +29,8 @@ ProcureMinds AI Pro depends on GenLayer because its core business logic requires
 
 ## Links
 
+- Builder Portal: https://portal.genlayer.foundation/
+- GenLayer Labs GitHub: https://github.com/genlayerlabs
 - GitHub: https://github.com/Jinchainne/procureminds
 - Live Demo / Vercel: TODO
 - Contract Address: TODO

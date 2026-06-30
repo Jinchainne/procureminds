@@ -63,6 +63,12 @@ Open `http://localhost:3000`.
 
 ## Live GenLayer setup
 
+Useful GenLayer links:
+
+- Builder portal: https://portal.genlayer.foundation/
+- GenLayer Labs GitHub: https://github.com/genlayerlabs
+- GenLayer docs: https://docs.genlayer.com
+
 ### 1. Start local GenLayer environment
 
 ```bash
