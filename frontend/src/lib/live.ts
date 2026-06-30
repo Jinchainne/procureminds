@@ -168,12 +168,34 @@ export function createLiveClient(): ProcurementClient {
       return { rfq, winner, tx };
     },
 
+    async closeRfq(rfqId: number) {
+      const tx = await write("close_rfq", [rfqId]);
+      const rfq = await api.getRfq(rfqId);
+
+      return { rfq, tx };
+    },
+
+    async getLatestRfq() {
+      const total = numberFrom(await read("get_total_rfqs", []));
+      if (total <= 0) return null;
+      return api.getRfq(total);
+    },
+
     async getRfq(rfqId: number) {
       return normalizeRfq(await read("get_rfq", [rfqId]));
     },
 
     async getSupplier(rfqId: number, supplierIndex: number) {
       return normalizeSupplier(await read("get_supplier", [rfqId, supplierIndex]));
+    },
+
+    async listSuppliers(rfqId: number) {
+      const rfq = await api.getRfq(rfqId);
+      const suppliers: Supplier[] = [];
+      for (let supplierIndex = 1; supplierIndex <= rfq.supplierCount; supplierIndex += 1) {
+        suppliers.push(await api.getSupplier(rfqId, supplierIndex));
+      }
+      return suppliers;
     }
   };
 

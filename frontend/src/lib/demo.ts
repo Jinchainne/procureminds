@@ -58,6 +58,12 @@ function saveState(state: DemoState) {
   }
 }
 
+function suppliersFor(state: DemoState, rfqId: number) {
+  return Object.values(state.suppliers)
+    .filter((supplier) => supplier.rfqId === rfqId)
+    .sort((a, b) => a.supplierIndex - b.supplierIndex);
+}
+
 function bounded(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
@@ -175,6 +181,23 @@ export function createDemoClient(): ProcurementClient {
       saveState(state);
       return { rfq, winner, tx: { txHash: `demo-winner-${rfqId}-${winner.supplierIndex}` } };
     },
+    async closeRfq(rfqId) {
+      const state = loadState();
+      const rfq = state.rfqs[rfqId];
+      if (!rfq) throw new Error("RFQ not found.");
+      rfq.status = "CLOSED";
+      rfq.evaluationSummary = "RFQ closed in demo mode.";
+      state.rfqs[rfqId] = rfq;
+      saveState(state);
+      return { rfq, tx: { txHash: `demo-close-${rfqId}` } };
+    },
+    async getLatestRfq() {
+      const state = loadState();
+      const latestId = Object.keys(state.rfqs)
+        .map(Number)
+        .sort((a, b) => b - a)[0];
+      return latestId ? state.rfqs[latestId] : null;
+    },
     async getRfq(rfqId) {
       const rfq = loadState().rfqs[rfqId];
       if (!rfq) throw new Error("RFQ not found.");
@@ -184,6 +207,14 @@ export function createDemoClient(): ProcurementClient {
       const supplier = loadState().suppliers[key(rfqId, supplierIndex)];
       if (!supplier) throw new Error("Supplier not found.");
       return supplier;
+    },
+    async listSuppliers(rfqId) {
+      return suppliersFor(loadState(), rfqId);
+    },
+    async resetDemo() {
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem(STORE_KEY);
+      }
     }
   };
 }

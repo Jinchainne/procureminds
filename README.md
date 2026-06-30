@@ -16,11 +16,12 @@ GenLayer makes this possible through Intelligent Contracts, web access, LLM call
 
 ## Demo flow
 
-1. Create an RFQ with requirements, evaluation criteria, and budget.
+1. Run the browser sample flow or create an RFQ with requirements, evaluation criteria, and budget.
 2. Submit supplier website/proposal URLs, price, and claims.
-3. Evaluate each supplier through the GenLayer contract.
+3. Evaluate each supplier through the GenLayer contract or deterministic demo adapter.
 4. Review scorecards: requirements fit, credibility, delivery, price, risk control.
 5. Select the winner using deterministic tie breakers: score, lower risk, then lower price.
+6. Export a procurement packet JSON for the submission record.
 
 ## Project structure
 

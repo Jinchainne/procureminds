@@ -75,7 +75,7 @@ The contract stores five dimensions:
 The overall score maps to verdicts:
 
 - `APPROVED`: score >= 80
-- `NEEDS_REVIEW`: score 50–79
+- `NEEDS_REVIEW`: score 50-79
 - `REJECTED`: score < 50
 
 ## Winner selection

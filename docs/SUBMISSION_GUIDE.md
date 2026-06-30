@@ -5,19 +5,19 @@
 Choose:
 
 ```txt
-Builder → Projects
+Builder -> Projects
 ```
 
 ## Title
 
 ```txt
-ProcureMinds AI Pro — AI Procurement Committee on GenLayer
+ProcureMinds AI Pro - AI Procurement Committee on GenLayer
 ```
 
 ## Description to paste
 
 ```txt
-ProcureMinds AI Pro is a GenLayer Intelligent Contract project for AI-powered procurement evaluation. Buyers create an RFQ, suppliers submit website/proposal URLs, and the contract reads live web data, evaluates qualitative vendor fit, scores suppliers from 0–100, classifies risk, and selects the winning supplier on-chain.
+ProcureMinds AI Pro is a GenLayer Intelligent Contract project for AI-powered procurement evaluation. Buyers create an RFQ, suppliers submit website/proposal URLs, and the contract reads live web data, evaluates qualitative vendor fit, scores suppliers from 0-100, classifies risk, and selects the winning supplier on-chain.
 
 This project is GenLayer-native because the core logic requires subjective judgment, live web access, and LLM-based consensus. A traditional smart contract cannot read supplier proposals or compare credibility, delivery capability, price reasonableness, and risk.
 
@@ -33,10 +33,9 @@ The submission includes a Python Intelligent Contract, a Next.js demo UI, GenLay
 
 ## Demo video structure
 
-1. Show the problem: subjective vendor selection cannot be done by normal smart contracts.
-2. Create RFQ.
-3. Submit two suppliers.
-4. Evaluate suppliers.
-5. Show scorecard dimensions and risk.
-6. Select winner.
-7. Explain why GenLayer is required.
+1. Open the app in demo mode and run the sample flow.
+2. Show the created RFQ and two submitted suppliers.
+3. Show scorecard dimensions, risk, evidence, and red flags.
+4. Select or confirm the winner.
+5. Export the procurement packet JSON.
+6. Explain why GenLayer is required for web evidence, qualitative evaluation, and validator consensus.

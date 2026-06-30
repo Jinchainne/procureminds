@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { getProcurementClient, getRuntimeMode } from "../lib/client";
 import { demoDefaults } from "../lib/demo";
 import type { Rfq, RfqInput, Supplier, SupplierInput } from "../lib/types";
@@ -54,6 +54,79 @@ export default function Home() {
     }
   }
 
+  useEffect(() => {
+    let active = true;
+
+    async function loadLatest() {
+      setBusy("Load state");
+      try {
+        const latest = await client.getLatestRfq();
+        if (!active) return;
+        if (!latest) {
+          pushLog("No saved RFQ", runtime.mode);
+          return;
+        }
+        const latestSuppliers = await client.listSuppliers(latest.id);
+        if (!active) return;
+        setRfq(latest);
+        setSuppliers(latestSuppliers);
+        pushLog("Loaded RFQ", `#${latest.id}`);
+      } catch (err) {
+        if (!active) return;
+        const message = err instanceof Error ? err.message : "Unable to load state";
+        setError(message);
+        pushLog("Load state", message);
+      } finally {
+        if (active) setBusy("");
+      }
+    }
+
+    void loadLatest();
+
+    return () => {
+      active = false;
+    };
+  }, [client, runtime.mode]);
+
+  async function refreshState() {
+    const result = await handleAction("Refresh state", async () => {
+      const current = rfq ? await client.getRfq(rfq.id) : await client.getLatestRfq();
+      const currentSuppliers = current ? await client.listSuppliers(current.id) : [];
+      return { rfq: current, suppliers: currentSuppliers };
+    });
+    if (!result) return;
+    setRfq(result.rfq);
+    setSuppliers(result.suppliers);
+  }
+
+  async function runSampleFlow() {
+    const result = await handleAction("Run sample flow", async () => {
+      if (client.mode !== "demo") {
+        throw new Error("Sample flow is only available in demo mode. Use individual transactions for live mode.");
+      }
+
+      const created = await client.createRfq(demoDefaults.rfq);
+      const supplierA = await client.submitSupplier(created.rfq.id, demoDefaults.supplierA);
+      const supplierB = await client.submitSupplier(created.rfq.id, demoDefaults.supplierB);
+      const evaluatedA = await client.evaluateSupplier(created.rfq.id, supplierA.supplier.supplierIndex);
+      const evaluatedB = await client.evaluateSupplier(created.rfq.id, supplierB.supplier.supplierIndex);
+      const selected = await client.selectWinner(created.rfq.id);
+
+      return {
+        rfq: selected.rfq,
+        suppliers: [evaluatedA.supplier, evaluatedB.supplier].map((supplier) =>
+          supplier.supplierIndex === selected.winner?.supplierIndex ? selected.winner : supplier
+        )
+      };
+    });
+
+    if (!result) return;
+    setRfqForm(demoDefaults.rfq);
+    setSupplierForm(demoDefaults.supplierA);
+    setRfq(result.rfq);
+    setSuppliers(result.suppliers);
+  }
+
   async function createRfq(event: FormEvent) {
     event.preventDefault();
     const result = await handleAction("Create RFQ", () => client.createRfq(rfqForm));
@@ -96,12 +169,75 @@ export default function Home() {
     if (result.tx?.txHash) pushLog("Transaction", result.tx.txHash);
   }
 
+  async function evaluateAllSuppliers() {
+    if (!rfq || suppliers.length === 0) return;
+    const result = await handleAction("Evaluate all suppliers", async () => {
+      const evaluated: Supplier[] = [];
+      for (const supplier of suppliers) {
+        if (supplier.verdict === "PENDING") {
+          const response = await client.evaluateSupplier(rfq.id, supplier.supplierIndex);
+          evaluated.push(response.supplier);
+        } else {
+          evaluated.push(supplier);
+        }
+      }
+      return evaluated.sort((a, b) => a.supplierIndex - b.supplierIndex);
+    });
+
+    if (!result) return;
+    setSuppliers(result);
+  }
+
+  async function closeCurrentRfq() {
+    if (!rfq) return;
+    const result = await handleAction("Close RFQ", () => client.closeRfq(rfq.id));
+    if (!result) return;
+    setRfq(result.rfq);
+    if (result.tx?.txHash) pushLog("Transaction", result.tx.txHash);
+  }
+
+  async function resetDemo() {
+    if (!client.resetDemo) {
+      setError("Reset is only available in demo mode.");
+      return;
+    }
+
+    await handleAction("Reset demo", () => client.resetDemo!());
+    setRfq(null);
+    setSuppliers([]);
+    setRfqForm(initialRfq);
+    setSupplierForm(initialSupplier);
+    setLogs([txLine("Demo reset", "ready")]);
+  }
+
+  function exportPacket() {
+    const packet = {
+      project: "ProcureMinds AI Pro",
+      generatedAt: new Date().toISOString(),
+      runtime,
+      rfq,
+      suppliers,
+      evaluatedCount,
+      winner: bestSupplier ?? null,
+      logs
+    };
+    const blob = new Blob([JSON.stringify(packet, null, 2)], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `procureminds-rfq-${rfq?.id ?? "draft"}-packet.json`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+    pushLog("Export packet", link.download);
+  }
+
   function loadSampleSupplier(which: "A" | "B") {
     setSupplierForm(which === "A" ? demoDefaults.supplierA : demoDefaults.supplierB);
   }
 
   const evaluatedCount = suppliers.filter((s) => s.verdict !== "PENDING").length;
   const bestSupplier = suppliers.find((s) => s.supplierIndex === rfq?.winner);
+  const pendingCount = suppliers.length - evaluatedCount;
 
   return (
     <main className="shell">
@@ -114,6 +250,7 @@ export default function Home() {
           <a className="nav-link" href="#rfq">RFQ</a>
           <a className="nav-link" href="#suppliers">Suppliers</a>
           <a className="nav-link" href="#results">Results</a>
+          <button className="nav-link nav-button" onClick={refreshState} disabled={Boolean(busy)}>Refresh</button>
         </div>
       </nav>
 
@@ -126,6 +263,9 @@ export default function Home() {
           </p>
           <div className="hero-actions">
             <a className="btn" href="#rfq">Start RFQ</a>
+            <button className="btn secondary" onClick={runSampleFlow} disabled={Boolean(busy) || runtime.mode !== "demo"}>
+              {busy === "Run sample flow" ? "Running..." : "Run sample flow"}
+            </button>
             <a className="btn secondary" href="https://docs.genlayer.com" target="_blank" rel="noreferrer">GenLayer docs</a>
           </div>
         </div>
@@ -135,6 +275,11 @@ export default function Home() {
           <div className="status-row"><span>Mode</span><strong><span className={runtime.mode === "live" ? "badge live" : "badge demo"}>{runtime.mode.toUpperCase()}</span></strong></div>
           <div className="status-row"><span>Chain</span><strong>{runtime.chain}</strong></div>
           <div className="status-row"><span>Contract</span><strong>{runtime.contractAddress}</strong></div>
+          <div className="status-row"><span>Current RFQ</span><strong>{rfq ? `#${rfq.id}` : "None"}</strong></div>
+          <div className="action-row">
+            <button className="btn secondary" onClick={exportPacket} disabled={Boolean(busy)}>Export</button>
+            <button className="btn danger" onClick={resetDemo} disabled={Boolean(busy) || runtime.mode !== "demo"}>Reset</button>
+          </div>
           {runtime.mode === "demo" && (
             <div className="alert warn">Demo mode is browser-local so you can record the product flow before deployment. Set <strong>NEXT_PUBLIC_CONTRACT_ADDRESS</strong> and <strong>NEXT_PUBLIC_DEMO_MODE=false</strong> to call GenLayer live.</div>
           )}
@@ -145,6 +290,7 @@ export default function Home() {
         <div className="metric"><span>RFQ status</span><strong>{rfq?.status ?? "Not created"}</strong></div>
         <div className="metric"><span>Suppliers</span><strong>{suppliers.length}</strong></div>
         <div className="metric"><span>Evaluated</span><strong>{evaluatedCount}</strong></div>
+        <div className="metric"><span>Pending</span><strong>{pendingCount}</strong></div>
         <div className="metric"><span>Winner</span><strong>{bestSupplier?.name ?? "Pending"}</strong></div>
       </section>
 
@@ -206,7 +352,12 @@ export default function Home() {
                 <h2>Supplier scorecards</h2>
                 <p className="help">Click Evaluate for each supplier, then select the winner.</p>
               </div>
-              <button className="btn" onClick={selectWinner} disabled={Boolean(busy) || !rfq || evaluatedCount === 0}>{busy === "Select winner" ? "Selecting..." : "Select winner"}</button>
+              <div className="split-actions">
+                <button className="btn secondary" onClick={evaluateAllSuppliers} disabled={Boolean(busy) || !rfq || pendingCount === 0 || rfq.status !== "OPEN"}>
+                  {busy === "Evaluate all suppliers" ? "Evaluating..." : "Evaluate all"}
+                </button>
+                <button className="btn" onClick={selectWinner} disabled={Boolean(busy) || !rfq || evaluatedCount === 0 || rfq.status !== "OPEN"}>{busy === "Select winner" ? "Selecting..." : "Select winner"}</button>
+              </div>
             </div>
 
             {suppliers.length === 0 ? (
@@ -252,7 +403,12 @@ export default function Home() {
           </div>
 
           <div className="panel">
-            <h2>Current RFQ</h2>
+            <div className="card-top">
+              <h2>Current RFQ</h2>
+              <button className="btn secondary" onClick={closeCurrentRfq} disabled={Boolean(busy) || !rfq || rfq.status !== "OPEN"}>
+                {busy === "Close RFQ" ? "Closing..." : "Close RFQ"}
+              </button>
+            </div>
             {rfq ? (
               <div>
                 <p className="result-text"><strong>#{rfq.id} {rfq.title}</strong></p>
