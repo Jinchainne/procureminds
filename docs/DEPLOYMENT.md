@@ -49,13 +49,11 @@ Set environment variables:
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_contract_address
 NEXT_PUBLIC_GENLAYER_CHAIN=localnet
 NEXT_PUBLIC_GENLAYER_RPC_URL=http://localhost:4000/api
-NEXT_PUBLIC_DEMO_MODE=false
 ```
 
-For a public Vercel demo, use a public GenLayer RPC/studionet/testnet configuration rather than a localhost RPC.
+For a public Vercel deployment, use a public GenLayer RPC/studionet/testnet configuration rather than a localhost RPC.
 
 ## Notes
 
-- Use demo mode for UI recording if the GenLayer deployment is not ready.
 - Use live mode for the Builder submission if possible.
-- Keep the same browser session when testing local account-based flows, because the demo SDK account is created in the client session.
+- The public UI shows a setup-required state until `NEXT_PUBLIC_CONTRACT_ADDRESS` is configured.

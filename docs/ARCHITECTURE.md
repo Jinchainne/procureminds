@@ -27,12 +27,12 @@ Responsibilities:
 - evaluation dashboard,
 - scorecard visualization,
 - transaction log,
-- demo mode and live GenLayer mode.
+- live GenLayer mode with explicit setup state when no contract address is configured.
 
 ### 3. Client adapters
 
 - `frontend/src/lib/live.ts`: GenLayerJS read/write adapter.
-- `frontend/src/lib/demo.ts`: browser-local demo adapter for pitch/demo recording before deployment.
+- `frontend/src/lib/live.ts`: GenLayerJS adapter for live contract calls.
 
 ## Data model
 

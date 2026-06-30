@@ -54,7 +54,7 @@ export type TransactionMeta = {
 };
 
 export type ProcurementClient = {
-  mode: "demo" | "live";
+  mode: "live" | "setup";
   contractAddress?: string;
   createRfq(input: RfqInput): Promise<{ rfq: Rfq; tx?: TransactionMeta }>;
   submitSupplier(rfqId: number, input: SupplierInput): Promise<{ supplier: Supplier; tx?: TransactionMeta }>;
@@ -65,5 +65,4 @@ export type ProcurementClient = {
   getRfq(rfqId: number): Promise<Rfq>;
   getSupplier(rfqId: number, supplierIndex: number): Promise<Supplier>;
   listSuppliers(rfqId: number): Promise<Supplier[]>;
-  resetDemo?(): Promise<void>;
 };

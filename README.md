@@ -14,11 +14,11 @@ Traditional deterministic smart contracts are not enough for procurement evaluat
 
 GenLayer makes this possible through Intelligent Contracts, web access, LLM calls, and validator consensus around non-deterministic outputs.
 
-## Demo flow
+## Live Workflow
 
-1. Run the browser sample flow or create an RFQ with requirements, evaluation criteria, and budget.
+1. Create an RFQ with requirements, evaluation criteria, and budget.
 2. Submit supplier website/proposal URLs, price, and claims.
-3. Evaluate each supplier through the GenLayer contract or deterministic demo adapter.
+3. Evaluate each supplier through the GenLayer contract.
 4. Review scorecards: requirements fit, credibility, delivery, price, risk control.
 5. Select the winner using deterministic tie breakers: score, lower risk, then lower price.
 6. Export a procurement packet JSON for the submission record.
@@ -31,7 +31,6 @@ contracts/
 frontend/
   src/app/page.tsx            # Next.js UI
   src/lib/live.ts             # GenLayerJS adapter
-  src/lib/demo.ts             # local demo adapter
 scripts/
   deploy_notes.md             # manual deployment guide
   deploy.ts                   # SDK deployment template
@@ -44,7 +43,7 @@ docs/
 tests/
   contract_test_plan.md
 SUBMISSION.md
-DEMO_SCRIPT.md
+WALKTHROUGH_SCRIPT.md         # walkthrough recording script
 ```
 
 ## Quick start
@@ -54,7 +53,7 @@ DEMO_SCRIPT.md
 cd frontend
 npm install
 
-# 2) Run local UI in demo mode
+# 2) Run local UI
 cp .env.example .env.local
 npm run dev
 ```
@@ -102,7 +101,6 @@ Create `frontend/.env.local`:
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_contract_address
 NEXT_PUBLIC_GENLAYER_CHAIN=localnet
 NEXT_PUBLIC_GENLAYER_RPC_URL=http://localhost:4000/api
-NEXT_PUBLIC_DEMO_MODE=false
 ```
 
 Then run:
@@ -129,19 +127,12 @@ npm run deploy:cli           # deploy via GenLayer CLI
 
 This repository includes `vercel.json`, so Vercel can deploy from the repo root while building the Next.js app in `frontend/`.
 
-For a public demo before the contract is live, leave demo mode enabled:
-
-```env
-NEXT_PUBLIC_DEMO_MODE=true
-```
-
 For a live GenLayer deployment, set:
 
 ```env
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_contract_address
 NEXT_PUBLIC_GENLAYER_CHAIN=localnet
 NEXT_PUBLIC_GENLAYER_RPC_URL=https://your-public-genlayer-rpc
-NEXT_PUBLIC_DEMO_MODE=false
 ```
 
 ## Contract highlights
@@ -160,7 +151,7 @@ NEXT_PUBLIC_DEMO_MODE=false
 - [ ] Contract deployed to GenLayer Studio / testnet
 - [ ] Contract address added to frontend env
 - [ ] Vercel deployment created
-- [ ] 1-2 minute demo video recorded
+- [ ] 1-2 minute walkthrough video recorded
 - [ ] `SUBMISSION.md` links updated
 
 ## License

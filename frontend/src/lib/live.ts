@@ -55,7 +55,7 @@ function normalizeSupplier(raw: any): Supplier {
 function getContractAddress() {
   const address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
   if (!address) {
-    throw new Error("NEXT_PUBLIC_CONTRACT_ADDRESS is not set. Deploy the contract first or enable demo mode.");
+    throw new Error("NEXT_PUBLIC_CONTRACT_ADDRESS is not set. Deploy the GenLayer contract first.");
   }
   return address;
 }

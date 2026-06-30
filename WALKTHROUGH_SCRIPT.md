@@ -1,4 +1,4 @@
-# Demo Script
+# Walkthrough Script
 
 ## 0:00-0:15 - Problem
 
@@ -10,7 +10,7 @@ ProcureMinds AI Pro uses a GenLayer Intelligent Contract. The contract reads sup
 
 ## 0:30-0:50 - Create RFQ
 
-Create an RFQ for an AI procurement software vendor with budget and evaluation criteria, or use Run sample flow for a complete browser demo packet.
+Create an RFQ for an AI procurement software vendor with budget and evaluation criteria after the contract address is configured.
 
 ## 0:50-1:15 - Submit suppliers
 

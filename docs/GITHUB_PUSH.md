@@ -27,13 +27,13 @@ Update `SUBMISSION.md`:
 
 ```txt
 GitHub: https://github.com/YOUR_USERNAME/procureminds-ai-pro
-Live Demo / Vercel: https://your-vercel-url.vercel.app
+Live App / Vercel: https://your-vercel-url.vercel.app
 Contract Address: 0x...
-Demo Video: https://...
+Walkthrough Video: https://...
 ```
 
 ## 4. Recommended GitHub repo settings
 
 - Add a short repo description: `AI procurement committee powered by GenLayer Intelligent Contracts`.
 - Add topics: `genlayer`, `intelligent-contracts`, `procurement`, `ai`, `nextjs`.
-- Pin the demo video in the README or repository About section.
+- Pin the walkthrough video in the README or repository About section.

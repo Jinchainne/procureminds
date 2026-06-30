@@ -2,11 +2,22 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { getProcurementClient, getRuntimeMode } from "../lib/client";
-import { demoDefaults } from "../lib/demo";
 import type { Rfq, RfqInput, Supplier, SupplierInput } from "../lib/types";
 
-const initialRfq: RfqInput = demoDefaults.rfq;
-const initialSupplier: SupplierInput = demoDefaults.supplierA;
+const initialRfq: RfqInput = {
+  title: "",
+  requirements: "",
+  evalCriteria: "",
+  budgetCents: 0
+};
+
+const initialSupplier: SupplierInput = {
+  name: "",
+  websiteUrl: "",
+  proposalUrl: "",
+  priceCents: 0,
+  claims: ""
+};
 
 function dollars(cents: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
@@ -18,7 +29,7 @@ function txLine(label: string, value?: string) {
 
 function riskClass(risk: string) {
   if (risk === "LOW") return "badge live";
-  if (risk === "HIGH") return "badge demo";
+  if (risk === "HIGH") return "badge warn";
   return "badge";
 }
 
@@ -30,8 +41,9 @@ export default function Home() {
   const [rfq, setRfq] = useState<Rfq | null>(null);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [busy, setBusy] = useState<string>("");
-  const [logs, setLogs] = useState<string[]>([txLine("App ready", runtime.mode === "demo" ? "demo mode" : "live mode")]);
+  const [logs, setLogs] = useState<string[]>([txLine("App ready", runtime.mode === "setup" ? "contract setup required" : "live mode")]);
   const [error, setError] = useState<string>("");
+  const contractReady = runtime.mode === "live";
 
   function pushLog(label: string, value?: string) {
     setLogs((current) => [txLine(label, value), ...current].slice(0, 8));
@@ -95,34 +107,6 @@ export default function Home() {
       return { rfq: current, suppliers: currentSuppliers };
     });
     if (!result) return;
-    setRfq(result.rfq);
-    setSuppliers(result.suppliers);
-  }
-
-  async function runSampleFlow() {
-    const result = await handleAction("Run sample flow", async () => {
-      if (client.mode !== "demo") {
-        throw new Error("Sample flow is only available in demo mode. Use individual transactions for live mode.");
-      }
-
-      const created = await client.createRfq(demoDefaults.rfq);
-      const supplierA = await client.submitSupplier(created.rfq.id, demoDefaults.supplierA);
-      const supplierB = await client.submitSupplier(created.rfq.id, demoDefaults.supplierB);
-      const evaluatedA = await client.evaluateSupplier(created.rfq.id, supplierA.supplier.supplierIndex);
-      const evaluatedB = await client.evaluateSupplier(created.rfq.id, supplierB.supplier.supplierIndex);
-      const selected = await client.selectWinner(created.rfq.id);
-
-      return {
-        rfq: selected.rfq,
-        suppliers: [evaluatedA.supplier, evaluatedB.supplier].map((supplier) =>
-          supplier.supplierIndex === selected.winner?.supplierIndex ? selected.winner : supplier
-        )
-      };
-    });
-
-    if (!result) return;
-    setRfqForm(demoDefaults.rfq);
-    setSupplierForm(demoDefaults.supplierA);
     setRfq(result.rfq);
     setSuppliers(result.suppliers);
   }
@@ -196,20 +180,6 @@ export default function Home() {
     if (result.tx?.txHash) pushLog("Transaction", result.tx.txHash);
   }
 
-  async function resetDemo() {
-    if (!client.resetDemo) {
-      setError("Reset is only available in demo mode.");
-      return;
-    }
-
-    await handleAction("Reset demo", () => client.resetDemo!());
-    setRfq(null);
-    setSuppliers([]);
-    setRfqForm(initialRfq);
-    setSupplierForm(initialSupplier);
-    setLogs([txLine("Demo reset", "ready")]);
-  }
-
   function exportPacket() {
     const packet = {
       project: "ProcureMinds AI Pro",
@@ -229,10 +199,6 @@ export default function Home() {
     link.click();
     window.URL.revokeObjectURL(url);
     pushLog("Export packet", link.download);
-  }
-
-  function loadSampleSupplier(which: "A" | "B") {
-    setSupplierForm(which === "A" ? demoDefaults.supplierA : demoDefaults.supplierB);
   }
 
   const evaluatedCount = suppliers.filter((s) => s.verdict !== "PENDING").length;
@@ -263,25 +229,21 @@ export default function Home() {
           </p>
           <div className="hero-actions">
             <a className="btn" href="#rfq">Start RFQ</a>
-            <button className="btn secondary" onClick={runSampleFlow} disabled={Boolean(busy) || runtime.mode !== "demo"}>
-              {busy === "Run sample flow" ? "Running..." : "Run sample flow"}
-            </button>
             <a className="btn secondary" href="https://docs.genlayer.com" target="_blank" rel="noreferrer">GenLayer docs</a>
           </div>
         </div>
 
         <aside className="status-card hero-card">
           <h2 style={{ margin: 0 }}>Runtime</h2>
-          <div className="status-row"><span>Mode</span><strong><span className={runtime.mode === "live" ? "badge live" : "badge demo"}>{runtime.mode.toUpperCase()}</span></strong></div>
+          <div className="status-row"><span>Mode</span><strong><span className={runtime.mode === "live" ? "badge live" : "badge"}>{runtime.mode === "setup" ? "SETUP REQUIRED" : runtime.mode.toUpperCase()}</span></strong></div>
           <div className="status-row"><span>Chain</span><strong>{runtime.chain}</strong></div>
           <div className="status-row"><span>Contract</span><strong>{runtime.contractAddress}</strong></div>
           <div className="status-row"><span>Current RFQ</span><strong>{rfq ? `#${rfq.id}` : "None"}</strong></div>
           <div className="action-row">
             <button className="btn secondary" onClick={exportPacket} disabled={Boolean(busy)}>Export</button>
-            <button className="btn danger" onClick={resetDemo} disabled={Boolean(busy) || runtime.mode !== "demo"}>Reset</button>
           </div>
-          {runtime.mode === "demo" && (
-            <div className="alert warn">Demo mode is browser-local so you can record the product flow before deployment. Set <strong>NEXT_PUBLIC_CONTRACT_ADDRESS</strong> and <strong>NEXT_PUBLIC_DEMO_MODE=false</strong> to call GenLayer live.</div>
+          {!contractReady && (
+            <div className="alert warn">Deploy the GenLayer contract, then set <strong>NEXT_PUBLIC_CONTRACT_ADDRESS</strong> in Vercel to enable live RFQ transactions.</div>
           )}
         </aside>
       </section>
@@ -315,22 +277,18 @@ export default function Home() {
               <label>Budget cents</label>
               <input className="input" type="number" value={rfqForm.budgetCents} onChange={(e) => setRfqForm({ ...rfqForm, budgetCents: Number(e.target.value) })} />
             </div>
-            <button className="btn" disabled={Boolean(busy)}>{busy === "Create RFQ" ? "Creating..." : "Create RFQ"}</button>
+            <button className="btn" disabled={Boolean(busy) || !contractReady}>{busy === "Create RFQ" ? "Creating..." : "Create RFQ"}</button>
           </form>
 
           <form className="panel form" id="suppliers" onSubmit={submitSupplier}>
             <h2>Submit Supplier</h2>
             <p className="help">Supplier website/proposal URLs become inputs for GenLayer web rendering and LLM consensus.</p>
-            <div className="inline">
-              <button type="button" className="btn secondary" onClick={() => loadSampleSupplier("A")}>Sample A</button>
-              <button type="button" className="btn secondary" onClick={() => loadSampleSupplier("B")}>Sample B</button>
-            </div>
             <div className="field"><label>Name</label><input className="input" value={supplierForm.name} onChange={(e) => setSupplierForm({ ...supplierForm, name: e.target.value })} /></div>
             <div className="field"><label>Website URL</label><input className="input" value={supplierForm.websiteUrl} onChange={(e) => setSupplierForm({ ...supplierForm, websiteUrl: e.target.value })} /></div>
             <div className="field"><label>Proposal URL</label><input className="input" value={supplierForm.proposalUrl} onChange={(e) => setSupplierForm({ ...supplierForm, proposalUrl: e.target.value })} /></div>
             <div className="field"><label>Price cents</label><input className="input" type="number" value={supplierForm.priceCents} onChange={(e) => setSupplierForm({ ...supplierForm, priceCents: Number(e.target.value) })} /></div>
             <div className="field"><label>Claims</label><textarea className="textarea" value={supplierForm.claims} onChange={(e) => setSupplierForm({ ...supplierForm, claims: e.target.value })} /></div>
-            <button className="btn" disabled={Boolean(busy) || !rfq}>{busy === "Submit supplier" ? "Submitting..." : "Submit Supplier"}</button>
+            <button className="btn" disabled={Boolean(busy) || !contractReady || !rfq}>{busy === "Submit supplier" ? "Submitting..." : "Submit Supplier"}</button>
           </form>
         </div>
 
@@ -353,10 +311,10 @@ export default function Home() {
                 <p className="help">Click Evaluate for each supplier, then select the winner.</p>
               </div>
               <div className="split-actions">
-                <button className="btn secondary" onClick={evaluateAllSuppliers} disabled={Boolean(busy) || !rfq || pendingCount === 0 || rfq.status !== "OPEN"}>
+                <button className="btn secondary" onClick={evaluateAllSuppliers} disabled={Boolean(busy) || !contractReady || !rfq || pendingCount === 0 || rfq.status !== "OPEN"}>
                   {busy === "Evaluate all suppliers" ? "Evaluating..." : "Evaluate all"}
                 </button>
-                <button className="btn" onClick={selectWinner} disabled={Boolean(busy) || !rfq || evaluatedCount === 0 || rfq.status !== "OPEN"}>{busy === "Select winner" ? "Selecting..." : "Select winner"}</button>
+                <button className="btn" onClick={selectWinner} disabled={Boolean(busy) || !contractReady || !rfq || evaluatedCount === 0 || rfq.status !== "OPEN"}>{busy === "Select winner" ? "Selecting..." : "Select winner"}</button>
               </div>
             </div>
 
@@ -372,7 +330,7 @@ export default function Home() {
                         <p className="meta">{supplier.websiteUrl}</p>
                         <p className="meta">Price: {dollars(supplier.priceCents)}</p>
                       </div>
-                      <span className={supplier.verdict === "APPROVED" ? "badge live" : supplier.verdict === "REJECTED" ? "badge demo" : "badge"}>{supplier.verdict}</span>
+                      <span className={supplier.verdict === "APPROVED" ? "badge live" : supplier.verdict === "REJECTED" ? "badge warn" : "badge"}>{supplier.verdict}</span>
                     </div>
 
                     <div className="score-line"><div className="score-fill" style={{ width: `${supplier.score}%` }} /></div>
@@ -393,7 +351,7 @@ export default function Home() {
                     {supplier.evidence && <p className="result-text"><strong>Evidence:</strong> {supplier.evidence}</p>}
                     {supplier.redFlags && <p className="result-text"><strong>Red flags:</strong> {supplier.redFlags}</p>}
                     {rfq?.winner === supplier.supplierIndex && <p className="alert">Winner selected for this RFQ.</p>}
-                    <button className="btn secondary" onClick={() => evaluateSupplier(supplier.supplierIndex)} disabled={Boolean(busy) || rfq?.status !== "OPEN"}>
+                    <button className="btn secondary" onClick={() => evaluateSupplier(supplier.supplierIndex)} disabled={Boolean(busy) || !contractReady || rfq?.status !== "OPEN"}>
                       {busy === `Evaluate supplier #${supplier.supplierIndex}` ? "Waiting for consensus..." : "Evaluate supplier"}
                     </button>
                   </article>
@@ -405,7 +363,7 @@ export default function Home() {
           <div className="panel">
             <div className="card-top">
               <h2>Current RFQ</h2>
-              <button className="btn secondary" onClick={closeCurrentRfq} disabled={Boolean(busy) || !rfq || rfq.status !== "OPEN"}>
+              <button className="btn secondary" onClick={closeCurrentRfq} disabled={Boolean(busy) || !contractReady || !rfq || rfq.status !== "OPEN"}>
                 {busy === "Close RFQ" ? "Closing..." : "Close RFQ"}
               </button>
             </div>
