@@ -1,160 +1,289 @@
 # ProcureMinds AI Pro
 
-**ProcureMinds AI Pro** is a GenLayer-native procurement dApp. Buyers create RFQs, suppliers submit website/proposal URLs, and a GenLayer Intelligent Contract reads web evidence, evaluates subjective vendor fit, writes scorecards on-chain, and selects a winning supplier.
+ProcureMinds AI Pro is a GenLayer-native procurement dApp that turns supplier evaluation into an auditable on-chain workflow. Buyers create RFQs, suppliers submit website and proposal URLs, and a GenLayer Intelligent Contract reads live web evidence, evaluates qualitative vendor fit, stores scorecards, classifies risk, and selects a winning supplier.
 
-## Why this is GenLayer-native
+This repository is built for the GenLayer Builder Program and is designed to run as a live application, not as a demo-mode mockup.
 
-Traditional deterministic smart contracts are not enough for procurement evaluation because the contract has to:
+## Live Deployment
+
+| Item | Value |
+| --- | --- |
+| Live app | https://procureminds.vercel.app |
+| Repository | https://github.com/Jinchainne/procureminds |
+| Network | `studionet` |
+| Contract | `0xb2123b641921Dc1E03fAAE0af4f71C4e184aA7c7` |
+| Builder portal | https://portal.genlayer.foundation |
+| GenLayer docs | https://docs.genlayer.com |
+
+## Why GenLayer
+
+Procurement decisions are not purely deterministic. A useful procurement committee has to inspect unstructured evidence, compare supplier claims against requirements, understand proposal language, reason about credibility, and classify delivery risk.
+
+Traditional smart contracts cannot do that because they cannot read supplier websites, interpret proposal text, or make subjective judgments from external data. ProcureMinds AI Pro uses GenLayer Intelligent Contracts so the contract can:
 
 - read live supplier websites and proposal pages,
-- interpret unstructured text,
-- judge qualitative fit against RFQ requirements,
-- classify vendor risk,
-- select a supplier using transparent but subjective procurement reasoning.
+- ask an LLM to produce structured procurement scorecards,
+- have validators independently re-run and check subjective outputs,
+- store accepted scorecards on-chain,
+- select the winner through transparent deterministic tie breakers.
 
-GenLayer makes this possible through Intelligent Contracts, web access, LLM calls, and validator consensus around non-deterministic outputs.
+## Core Features
 
-## Live Workflow
+- Live RFQ creation with requirements, scoring criteria, and budget.
+- Supplier submission with website URL, proposal URL, price, and claims.
+- GenLayer-powered supplier evaluation using web evidence and LLM reasoning.
+- Validator-backed scorecard validation for non-deterministic outputs.
+- On-chain score dimensions for fit, credibility, delivery, price, and risk control.
+- Risk classification and verdicts: `APPROVED`, `NEEDS_REVIEW`, or `REJECTED`.
+- Deterministic winner selection after evaluation.
+- Runtime panel for chain, contract, signer, RFQ count, and current RFQ state.
+- Procurement packet export as JSON for submission and audit records.
 
-1. Create an RFQ with requirements, evaluation criteria, and budget.
-2. Submit supplier website/proposal URLs, price, and claims.
-3. Evaluate each supplier through the GenLayer contract.
-4. Review scorecards: requirements fit, credibility, delivery, price, risk control.
-5. Select the winner using deterministic tie breakers: score, lower risk, then lower price.
-6. Export a procurement packet JSON for the submission record.
+## Product Workflow
 
-## Project structure
+1. A buyer creates an RFQ with detailed requirements, evaluation criteria, and budget.
+2. Suppliers submit website and proposal URLs, pricing, and written claims.
+3. The GenLayer contract renders supplier web/proposal evidence.
+4. The contract asks an LLM for a structured procurement scorecard.
+5. Validators independently verify stable decision fields and score bands.
+6. Accepted scorecards are stored on-chain.
+7. The buyer selects the winner using deterministic tie breakers: highest score, lower risk, then lower price.
+8. The UI exports the full procurement packet for review or submission.
+
+## Architecture
 
 ```txt
 contracts/
-  procureminds_ai_pro.py      # GenLayer Intelligent Contract
+  procureminds_ai_pro.py      GenLayer Intelligent Contract
+
 frontend/
-  src/app/page.tsx            # Next.js UI
-  src/lib/live.ts             # GenLayerJS adapter
+  public/brand/               Brand assets used by the UI
+  src/app/page.tsx            Next.js application interface
+  src/app/globals.css         Application styling
+  src/lib/client.ts           Runtime client selection
+  src/lib/live.ts             GenLayerJS live adapter
+  src/lib/types.ts            Shared UI/client types
+
 scripts/
-  deploy_notes.md             # manual deployment guide
-  deploy.ts                   # SDK deployment template
+  deploy.ts                   SDK deployment script with verification
+  deploy_notes.md             Deployment notes
+
 docs/
-  ARCHITECTURE.md
-  DEPLOYMENT.md
-  GITHUB_PUSH.md
-  SUBMISSION_GUIDE.md
-  TESTING.md
+  ARCHITECTURE.md             Component and data model notes
+  DEPLOYMENT.md               Deployment guide
+  SUBMISSION_GUIDE.md         Builder submission copy
+  TESTING.md                  Testing checklist
+
 tests/
-  contract_test_plan.md
-SUBMISSION.md
-WALKTHROUGH_SCRIPT.md         # walkthrough recording script
+  contract_test_plan.md       Contract behavior test plan
+
+SUBMISSION.md                 Builder submission summary
+WALKTHROUGH_SCRIPT.md         Recording script for a short walkthrough
 ```
 
-## Quick start
+## Intelligent Contract Design
+
+The contract is implemented in `contracts/procureminds_ai_pro.py`.
+
+### Stored RFQ Data
+
+- RFQ creator
+- title
+- requirements
+- evaluation criteria
+- budget
+- status
+- supplier count
+- selected winner
+- evaluation summary
+
+### Stored Supplier Data
+
+- supplier name
+- submitter wallet
+- website URL
+- proposal URL
+- price
+- claims
+- verdict
+- risk rating
+- overall score
+- scorecard dimensions
+- reason
+- evidence summary
+- red flags
+
+### Scorecard Dimensions
+
+Each supplier is scored from `0` to `100` across five dimensions:
+
+- requirements fit
+- credibility
+- delivery capability
+- price reasonableness
+- risk control
+
+The overall score maps to verdicts:
+
+- `APPROVED`: score >= 80
+- `NEEDS_REVIEW`: score 50-79
+- `REJECTED`: score < 50
+
+### Non-Deterministic Evaluation Pattern
+
+The contract follows a production-style GenLayer pattern:
+
+- deterministic storage reads happen before the non-deterministic block,
+- web rendering and LLM calls happen inside the leader function,
+- validators independently re-run the evaluation,
+- validation checks stable fields, score bands, verdicts, and risk proximity,
+- storage writes happen only after consensus returns an accepted scorecard.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- npm
+- Python 3.10+
+- GenLayer CLI for local Studio/localnet workflows
+
+### Install Dependencies
 
 ```bash
-# 1) Install frontend dependencies
+npm install
 cd frontend
 npm install
+```
 
-# 2) Run local UI
+### Run the Frontend Locally
+
+```bash
+cd frontend
 cp .env.example .env.local
 npm run dev
 ```
 
 Open `http://localhost:3000`.
 
-## Live GenLayer setup
+If `NEXT_PUBLIC_CONTRACT_ADDRESS` is empty, the UI shows setup mode and disables live write actions.
 
-Useful GenLayer links:
+## Environment Variables
 
-- Builder portal: https://portal.genlayer.foundation/
-- GenLayer Labs GitHub: https://github.com/genlayerlabs
-- GenLayer docs: https://docs.genlayer.com
-
-### 1. Start local GenLayer environment
-
-```bash
-npm install -g genlayer
-genlayer init
-genlayer up
-```
-
-Default local RPC: `http://localhost:4000/api`.
-
-### 2. Deploy the contract
-
-Option A - GenLayer Studio:
-
-1. Open local Studio.
-2. Paste or load `contracts/procureminds_ai_pro.py`.
-3. Deploy.
-4. Copy the contract address.
-
-Option B - CLI:
-
-```bash
-genlayer deploy --contract contracts/procureminds_ai_pro.py
-```
-
-### 3. Connect the frontend
-
-Create `frontend/.env.local`:
-
-```env
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_contract_address
-NEXT_PUBLIC_GENLAYER_CHAIN=localnet
-NEXT_PUBLIC_GENLAYER_RPC_URL=http://localhost:4000/api
-```
-
-Then run:
-
-```bash
-cd frontend
-npm run dev
-```
-
-## Scripts
-
-```bash
-npm run dev                  # run the frontend from the repo root
-npm run build                # Vercel-compatible production build
-npm run typecheck            # TypeScript check
-npm run contract:syntax      # Python syntax check
-npm run contract:lint        # requires genvm-linter
-npm run frontend:typecheck   # TypeScript check
-npm run frontend:build       # Next.js production build
-npm run deploy:cli           # deploy via GenLayer CLI
-```
-
-## Vercel
-
-This repository includes `vercel.json`, so Vercel can deploy from the repo root while building the Next.js app in `frontend/`.
-The current production app is live at https://procureminds.vercel.app.
-
-For a live GenLayer deployment, set:
+For the current live `studionet` deployment:
 
 ```env
 NEXT_PUBLIC_CONTRACT_ADDRESS=0xb2123b641921Dc1E03fAAE0af4f71C4e184aA7c7
 NEXT_PUBLIC_GENLAYER_CHAIN=studionet
 ```
 
-Leave `NEXT_PUBLIC_GENLAYER_RPC_URL` unset for the built-in `studionet` chain preset unless you are intentionally using a custom public RPC.
+Leave `NEXT_PUBLIC_GENLAYER_RPC_URL` unset when using the built-in `studionet` chain preset. Set it only when using a custom public RPC endpoint.
 
-## Contract highlights
+For local Studio/localnet:
 
-- Production-style non-deterministic block:
-  - storage reads happen before `leader_fn`,
-  - web/LLM work happens inside `leader_fn`,
-  - storage writes happen only after consensus.
-- Validator re-runs the evaluation independently and checks stable decision fields.
-- Scorecard dimensions are stored on-chain for auditability.
-- Winner selection is deterministic after supplier evaluation.
+```env
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x_your_local_contract_address
+NEXT_PUBLIC_GENLAYER_CHAIN=localnet
+NEXT_PUBLIC_GENLAYER_RPC_URL=http://localhost:4000/api
+```
 
-## Builder Program checklist
+## Deploying the Contract
 
-- [ ] Public GitHub repository
-- [x] Contract deployed to GenLayer Studio / testnet
-- [x] Contract address added to frontend env
-- [x] Vercel deployment created
-- [ ] 1-2 minute walkthrough video recorded
-- [ ] `SUBMISSION.md` links updated
+The SDK deployment script deploys the contract, waits for finalization, checks the execution result, verifies the deployed contract by calling `get_total_rfqs`, and writes the frontend environment file.
+
+```bash
+GENLAYER_CHAIN=studionet npm run deploy:sdk
+```
+
+Optional signer:
+
+```bash
+GENLAYER_PRIVATE_KEY=0x_your_private_key GENLAYER_CHAIN=studionet npm run deploy:sdk
+```
+
+Local GenLayer Studio flow:
+
+```bash
+npm install -g genlayer
+genlayer init
+genlayer up
+genlayer deploy --contract contracts/procureminds_ai_pro.py
+```
+
+## Deploying the Frontend
+
+The root `vercel.json` configures Vercel to install, build, and output the Next.js app from `frontend/`.
+
+Required Vercel production variables:
+
+```env
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xb2123b641921Dc1E03fAAE0af4f71C4e184aA7c7
+NEXT_PUBLIC_GENLAYER_CHAIN=studionet
+```
+
+Deploy:
+
+```bash
+npx vercel deploy --prod
+```
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Run the frontend from the repository root. |
+| `npm run build` | Build the Next.js frontend for production. |
+| `npm run test` | Compile the contract and run TypeScript type checking. |
+| `npm run typecheck` | Run frontend TypeScript checking. |
+| `npm run contract:syntax` | Run Python syntax validation for the contract. |
+| `npm run contract:lint` | Run GenVM linting when `genvm-lint` is installed. |
+| `npm run deploy:sdk` | Deploy the GenLayer contract with SDK verification. |
+| `npm run deploy:cli` | Deploy with the GenLayer CLI. |
+
+## Verification
+
+Local verification used for this repository:
+
+```bash
+npm run test
+npm run build
+```
+
+Live contract verification:
+
+```ts
+await client.readContract({
+  address: "0xb2123b641921Dc1E03fAAE0af4f71C4e184aA7c7",
+  functionName: "get_total_rfqs",
+  args: [],
+  stateStatus: "accepted"
+});
+```
+
+Expected result on a fresh deployment is `0`.
+
+## Builder Submission Notes
+
+ProcureMinds AI Pro is submitted under:
+
+```txt
+Builder -> Projects
+```
+
+Recommended submission summary:
+
+```txt
+ProcureMinds AI Pro is a GenLayer Intelligent Contract project for AI-powered procurement evaluation. Buyers create an RFQ, suppliers submit website/proposal URLs, and the contract reads live web data, evaluates qualitative vendor fit, scores suppliers from 0-100, classifies risk, and selects the winning supplier on-chain.
+
+This project is GenLayer-native because the core logic requires subjective judgment, live web access, and LLM-based consensus. A traditional smart contract cannot read supplier proposals or compare credibility, delivery capability, price reasonableness, and risk.
+```
+
+## Security and Operational Notes
+
+- The app is configured for live GenLayer operation and does not rely on public mock/demo data.
+- `NEXT_PUBLIC_*` variables are visible in the browser by design. Do not put private keys in frontend environment variables.
+- Use `GENLAYER_PRIVATE_KEY` only in a secure local or CI environment when deploying contracts.
+- Always confirm transaction execution success, not only finalization status, before publishing a new contract address.
 
 ## License
 
